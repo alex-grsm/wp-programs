@@ -25,51 +25,63 @@ get_header();
         <div class="ej-programs__container">
 
             <?php
-                $parent_terms = get_terms(
-                    array(
-                        'taxonomy' => 'category',
+                $parent_category = get_category_by_slug('programme-1');
+                $parent_id = $parent_category->term_id;
+
+                $cache_key = 'my_programs_list_' . $parent_id;
+                $programs_list = get_transient($cache_key);
+
+                if (false === $programs_list) {
+                    $args = array(
+                        'taxonomy'   => 'category',
                         'hide_empty' => false,
-                        'parent' => get_category_by_slug('programme-1')->term_id,
-                        'orderby' => 'name',
-                        'order' => 'ASC'
-                    )
-                );
+                        'parent'     => $parent_id,
+                        'orderby'    => 'name',
+                        'order'      => 'ASC'
+                    );
 
-                usort($parent_terms, function($a, $b) {
-                    return strnatcasecmp($a->name, $b->name);
-                });
+                    $parent_terms = get_terms($args);
 
-                if ($parent_terms) :
-                    echo '<div class="programs-list">';
-                    foreach ($parent_terms as $parent_term) :
-                        // выводим название родительской категории 
-                        echo '<div class="programs-list__item">';
-                        echo '<span data-term-id="' . $parent_term->term_id . '">' . $parent_term->name . '</span>';
-                        echo '</div>';
+                    $programs_list = '';
 
-                        // выводим все дочерние категории первого порядка
-                        $child_terms = get_terms(
-                            array(
-                                'taxonomy' => 'category',
+                    if (!empty($parent_terms)) {
+                        $programs_list .= '<div class="programs-list">';
+
+                        foreach ($parent_terms as $parent_term) {
+                            $programs_list .= '<div class="programs-list__item">';
+                            $programs_list .= '<span data-term-id="' . $parent_term->term_id . '">' . $parent_term->name . '</span>';
+                            $programs_list .= '</div>';
+
+                            $args = array(
+                                'taxonomy'   => 'category',
                                 'hide_empty' => false,
-                                'parent' => $parent_term->term_id,
-                                'orderby' => 'name',
-                                'order' => 'ASC'
-                            )
-                        );
+                                'parent'     => $parent_term->term_id,
+                                'orderby'    => 'name',
+                                'order'      => 'ASC'
+                            );
 
-                        if ($child_terms) :
-                            echo '<ul class="programs-tags">';
-                            foreach ($child_terms as $child_term) :
-                                echo '<li class="programs-tags__item">';
-                                echo '<span data-term-id="' . $child_term->term_id . '">' . $child_term->name . '</span>';
-                                echo '</li>';
-                            endforeach;
-                            echo '</ul>';
-                        endif;
-                    endforeach;
-                    echo '</div>';
-                endif;
+                            $child_terms = get_terms($args);
+
+                            if (!empty($child_terms)) {
+                                $programs_list .= '<ul class="programs-tags">';
+
+                                foreach ($child_terms as $child_term) {
+                                    $programs_list .= '<li class="programs-tags__item">';
+                                    $programs_list .= '<span data-term-id="' . $child_term->term_id . '">' . $child_term->name . '</span>';
+                                    $programs_list .= '</li>';
+                                }
+
+                                $programs_list .= '</ul>';
+                            }
+                        }
+
+                        $programs_list .= '</div>';
+                    }
+
+                    set_transient($cache_key, $programs_list, DAY_IN_SECONDS);
+                }
+
+                echo $programs_list;
             ?>
 
             <div class="program-box__wrap" style="opacity:1;">
