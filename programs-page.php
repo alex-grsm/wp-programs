@@ -222,37 +222,39 @@ $programsListItem.on('click', function() {
     $programsTags.toggleClass('show');
     $programsTags.children().removeClass('active').first().addClass('active');
 
-    const termId = $this.children().first().data('term-id');
+    $programsTags.children().first().trigger('click');
 
-    getPostsByCategory(termId).then((data) => {
-        console.log(data);
-        if (data.length) {
-            const content = {
-                Warm_Up: '',
-                Hauptteil: '',
-                Cool_Down: '',
-            };
+    // const termId = $this.children().first().data('term-id');
 
-            data.forEach((post) => {
-                const categories = post.categories;
-                const category = categories.find((category) => categoryMapping.some((item) => item.id === category));
+    // getPostsByCategory(termId).then((data) => {
+    //     console.log(data);
+    //     if (data.length) {
+    //         const content = {
+    //             Warm_Up: '',
+    //             Hauptteil: '',
+    //             Cool_Down: '',
+    //         };
 
-                if (category) {
-                    const categoryName = categoryMapping.find((item) => item.id === category)?.name;
+    //         data.forEach((post) => {
+    //             const categories = post.categories;
+    //             const category = categories.find((category) => categoryMapping.some((item) => item.id === category));
+
+    //             if (category) {
+    //                 const categoryName = categoryMapping.find((item) => item.id === category)?.name;
                     
-                    if (categoryName) {
-                        content[categoryName] += slideTemplate(post);
-                    }
-                }
-            });
+    //                 if (categoryName) {
+    //                     content[categoryName] += slideTemplate(post);
+    //                 }
+    //             }
+    //         });
 
-            updateContent(content);
-        }
-    }).then(() => {
-        $programsTags.children().first().trigger('click');
-    }).catch((error) => {
-        console.log(error);
-    });
+    //         updateContent(content);
+    //     }
+    // }).then(() => {
+    //     $programsTags.children().first().trigger('click');
+    // }).catch((error) => {
+    //     console.log(error);
+    // });
 
 });
 
